@@ -31,7 +31,7 @@ class App extends Component {
               </div>
             </nav>
             <br />
-            <h6>Welcome to CRUD Tutorial</h6> <br />
+            <h6>Welcome To Your Blog</h6> <br />
             <Switch>
               <Route exact path='/create' component={Create} />
               <Route path='/edit/:id' component={Edit} />
