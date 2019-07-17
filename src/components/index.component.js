@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
+import { BootstrapTable, TableHeaderColumn,InsertButton, DeleteButton   } from 'react-bootstrap-table';
 import myConstClass from '../environment';
 import Card from 'react-bootstrap/Card';
 
@@ -12,26 +12,38 @@ export default class Index extends Component {
             totalSize: 100,
             page: 1,
             sizePerPage: 5,
+            sortName: 'name',
+            sortOrder: 'desc'
         };
         this.fetchData = this.fetchData.bind(this);
         this.handlePageChange = this.handlePageChange.bind(this);
         this.handleSizePerPageChange = this.handleSizePerPageChange.bind(this);
+        this.onSortChange = this.onSortChange.bind(this);
     }
+    onSortChange(sortName, sortOrder) {
+        this.setState({
+            sortName:sortName,
+            sortOrder:sortOrder
+        });
+        this.fetchData(1,this.state.sizePerPage,this.state.sortName,this.state.sortOrder);
+      }
     componentDidMount() {
         this.fetchData();
     }
-    fetchData(page = this.state.page, sizePerPage = this.state.sizePerPage) {
+    fetchData(page = this.state.page, sizePerPage = this.state.sizePerPage,sortName = this.state.sortName,sortOrder= this.state.sortOrder) {
         axios.get(myConstClass.URL + 'all', {
             params: {
                 page: page,
-                limit: sizePerPage
+                limit: sizePerPage,
+                sortName:sortName,
+                sortOrder:sortOrder
             }
         }).then(data => {
             this.setState({
                 items: data.data.items,
                 totalSize: data.data.total,
                 page,
-                sizePerPage
+                sizePerPage,
             });
         });
     }
@@ -60,8 +72,41 @@ export default class Index extends Component {
             </button>
         )
     }
+    handleInsertButtonClick = (onClick) => {
+        // Custom your onClick event here,
+        // it's not necessary to implement this function if you have no any process before onClick
+        console.log('This is my custom function for InserButton click event');
+        // onClick();
+        this.props.history.push('/create');
+      }
+      handleDeleteButtonClick= (onClick)=>{
+          
+      }
+    createCustomInsertButton = (onClick) => {
+        return (
+          <InsertButton
+            btnText='CustomInsertText'
+            btnContextual='btn-warning'
+            className='my-custom-class'
+            btnGlyphicon='glyphicon-edit'
+            onClick={ () => this.handleInsertButtonClick(onClick) }/>
+        );
+      }
+      createCustomDeleteButton = (onClick) => {
+        return (
+          <DeleteButton
+            btnText='CustomDeleteText'
+            btnContextual='btn-warning'
+            className='my-custom-class'
+            btnGlyphicon='glyphicon-edit'
+            onClick={ () => this.handleDeleteButtonClick(onClick) }/>
+        );
+      }
     render() {
         const options = {
+            // insertBtn:this.createCustomInsertButton,
+            sortIndicator: true,
+            // deleteBtn: this.createCustomDeleteButton,
             onPageChange: this.handlePageChange,
             onSizePerPageList: this.handleSizePerPageChange,
             page: this.state.page,
@@ -79,13 +124,18 @@ export default class Index extends Component {
             prePage: 'Prev', // Previous page button text
             nextPage: 'Next',
             paginationShowsTotal: true,
+            sortName: this.state.sortName,
+            sortOrder: this.state.sortOrder,
+            onSortChange: this.onSortChange
         };
         return (
             <Card>
                 <Card.Header><Card.Title>All blog</Card.Title></Card.Header>
                 <Card.Body>
+                <p style={ { color: 'red' } }>sort: sortName={ this.state.sortName }, sortOrder={ this.state.sortOrder }</p>
                     <BootstrapTable
                         version='4'
+                        remote={true}
                         data={this.state.items}
                         options={options}
                         fetchInfo={{ dataTotalSize: this.state.totalSize }}
@@ -93,13 +143,11 @@ export default class Index extends Component {
                         loading={true}
                         hover
                         search
-                        remote={true}
-                        pagination={true}
-                        search={true}>
-                        <TableHeaderColumn isKey dataField='name' dataSort={true}>Name</TableHeaderColumn>
-                        <TableHeaderColumn dataField='email' dataSort={true}>Email</TableHeaderColumn>
-                        <TableHeaderColumn dataField='description' dataSort={true}>Description</TableHeaderColumn>
-                        {/* <TableHeaderColumn dataField="button" dataFormat={this.cellButton.bind(this)}>Buttons</TableHeaderColumn> */}
+                        pagination
+                        >
+                        <TableHeaderColumn isKey dataField='name' dataSort>Name</TableHeaderColumn>
+                        <TableHeaderColumn dataField='email' dataSort>Email</TableHeaderColumn>
+                        <TableHeaderColumn dataField='description' dataSort>Description</TableHeaderColumn>
                     </BootstrapTable>
                 </Card.Body>
             </Card>

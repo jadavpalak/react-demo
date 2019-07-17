@@ -10,6 +10,7 @@ export default class Create extends Component {
         this.onChangeName = this.onChangeName.bind(this);
         this.onChangeDescription = this.onChangeDescription.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
+        this.goToList = this.goToList.bind(this);
         this.state = {
             email: '',
             name: '',
@@ -30,6 +31,9 @@ export default class Create extends Component {
         this.setState({
             description: e.target.value
         });
+    }
+    goToList(e){
+        this.props.history.push('/index');
     }
     onSubmit(e) {
         e.preventDefault();
@@ -85,8 +89,9 @@ export default class Create extends Component {
                                             required>
                                         </textarea>
                                     </div>
-                                    <div className="form-group">
+                                    <div className="form-group row">
                                         <input type="submit" value="Create Blog" className="btn btn-primary" />
+                                        <input type="button" value="Cancel" className="btn btn-danger" onClick={this.goToList} />
                                     </div>
                                 </form>
                             </div>
