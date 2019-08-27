@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { BootstrapTable, TableHeaderColumn,InsertButton, DeleteButton   } from 'react-bootstrap-table';
+import { BootstrapTable, TableHeaderColumn, InsertButton, DeleteButton   } from 'react-bootstrap-table';
 import myConstClass from '../environment';
 import Card from 'react-bootstrap/Card';
 
@@ -13,30 +13,33 @@ export default class Index extends Component {
             page: 1,
             sizePerPage: 5,
             sortName: 'name',
-            sortOrder: 'desc'
+            sortOrder: 'desc',
+            search:'',
         };
         this.fetchData = this.fetchData.bind(this);
         this.handlePageChange = this.handlePageChange.bind(this);
         this.handleSizePerPageChange = this.handleSizePerPageChange.bind(this);
         this.onSortChange = this.onSortChange.bind(this);
+        this.onFilterChange = this.onFilterChange.bind(this);
     }
     onSortChange(sortName, sortOrder) {
         this.setState({
             sortName:sortName,
             sortOrder:sortOrder
         });
-        this.fetchData(1,this.state.sizePerPage,this.state.sortName,this.state.sortOrder);
+        this.fetchData(1, this.state.sizePerPage, this.state.sortName, this.state.sortOrder, this.state.search);
       }
     componentDidMount() {
         this.fetchData();
     }
-    fetchData(page = this.state.page, sizePerPage = this.state.sizePerPage,sortName = this.state.sortName,sortOrder= this.state.sortOrder) {
+    fetchData(page = this.state.page, sizePerPage = this.state.sizePerPage, sortName = this.state.sortName, sortOrder = this.state.sortOrder, search = this.state.search) {
         axios.get(myConstClass.URL + 'all', {
             params: {
                 page: page,
                 limit: sizePerPage,
                 sortName:sortName,
-                sortOrder:sortOrder
+                sortOrder:sortOrder,
+                search: this.state.search
             }
         }).then(data => {
             this.setState({
@@ -60,7 +63,6 @@ export default class Index extends Component {
     onClickProductSelected(cell, row, rowIndex) {
 
     }
-
     cellButton(cell, row, enumObject, rowIndex) {
         return (
             <button
@@ -73,10 +75,6 @@ export default class Index extends Component {
         )
     }
     handleInsertButtonClick = (onClick) => {
-        // Custom your onClick event here,
-        // it's not necessary to implement this function if you have no any process before onClick
-        console.log('This is my custom function for InserButton click event');
-        // onClick();
         this.props.history.push('/create');
       }
       handleDeleteButtonClick= (onClick)=>{
@@ -102,14 +100,19 @@ export default class Index extends Component {
             onClick={ () => this.handleDeleteButtonClick(onClick) }/>
         );
       }
+    onFilterChange(filterObj) {
+        this.setState({
+            search: filterObj,
+        });
+        this.fetchData(1, this.state.sizePerPage, this.state.sortName, this.state.sortOrder, this.state.search);
+    }
     render() {
         const options = {
-            // insertBtn:this.createCustomInsertButton,
             sortIndicator: true,
-            // deleteBtn: this.createCustomDeleteButton,
             onPageChange: this.handlePageChange,
             onSizePerPageList: this.handleSizePerPageChange,
             page: this.state.page,
+            onFilterChange: this.onFilterChange,
             sizePerPage: this.state.sizePerPage,
             alwaysShowAllBtns: true,
             sizePerPageList: [{
@@ -142,12 +145,11 @@ export default class Index extends Component {
                         striped
                         loading={true}
                         hover
-                        search
                         pagination
                         >
-                        <TableHeaderColumn isKey dataField='name' dataSort>Name</TableHeaderColumn>
-                        <TableHeaderColumn dataField='email' dataSort>Email</TableHeaderColumn>
-                        <TableHeaderColumn dataField='description' dataSort>Description</TableHeaderColumn>
+                        <TableHeaderColumn isKey ref='nameCol' dataField='name' dataSort filter={{ type: 'TextFilter' }}>Name</TableHeaderColumn>
+                        <TableHeaderColumn dataField='email' dataSort filter={{ type: 'TextFilter' }}>Email</TableHeaderColumn>
+                        <TableHeaderColumn dataField='description' dataSort filter={{ type: 'TextFilter' }}>Description</TableHeaderColumn>
                     </BootstrapTable>
                 </Card.Body>
             </Card>
